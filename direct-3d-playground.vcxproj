@@ -138,9 +138,9 @@ copy "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\bin\D
   <ItemGroup>
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="StepTimer.h" />
     <ClInclude Include="src\DeviceResources.h" />
     <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\StepTimer.h" />
     <ClInclude Include="src\WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
