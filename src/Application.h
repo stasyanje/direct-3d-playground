@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-class Game;
+class Renderer;
 class WindowManager;
 
 class Application
@@ -18,6 +18,6 @@ private:
     void Shutdown();
     int MessageLoop();
 
-    std::unique_ptr<Game> m_game;
+    std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<WindowManager> m_windowManager;
 };

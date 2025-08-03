@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Application.h"
-#include "Game.h"
+#include "Renderer.h"
 #include "WindowManager.h"
 
 using namespace DirectX;
 
 Application::Application() :
-    m_game(nullptr),
+    m_renderer(nullptr),
     m_windowManager(nullptr)
 {
 }
@@ -57,10 +57,10 @@ int Application::Run(HINSTANCE hInstance, int nCmdShow)
 
 bool Application::Initialize(HINSTANCE hInstance, int nCmdShow)
 {
-    m_game = std::make_unique<Game>();
+    m_renderer = std::make_unique<Renderer>();
     m_windowManager = std::make_unique<WindowManager>();
 
-    if (!m_windowManager->Initialize(hInstance, nCmdShow, m_game.get()))
+    if (!m_windowManager->Initialize(hInstance, nCmdShow, m_renderer.get()))
         return false;
 
     return true;
@@ -74,9 +74,9 @@ void Application::Shutdown()
         m_windowManager.reset();
     }
 
-    if (m_game)
+    if (m_renderer)
     {
-        m_game.reset();
+        m_renderer.reset();
     }
 }
 
@@ -92,7 +92,7 @@ int Application::MessageLoop()
         }
         else
         {
-            m_game->Tick();
+            m_renderer->Tick();
         }
     }
 

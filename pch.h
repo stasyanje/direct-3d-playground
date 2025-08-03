@@ -46,6 +46,8 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
+#include <d3dcompiler.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "WindowManager.h"
-#include "Game.h"
+#include "Renderer.h"
 
 extern LPCWSTR g_szAppName;
 
@@ -11,7 +11,7 @@ bool WindowManager::s_minimized = false;
 WindowManager::WindowManager() :
     m_hwnd(nullptr),
     m_hInstance(nullptr),
-    m_game(nullptr),
+    m_renderer(nullptr),
     m_fullscreen(false)
 {
 }
@@ -21,15 +21,15 @@ WindowManager::~WindowManager()
     Shutdown();
 }
 
-bool WindowManager::Initialize(HINSTANCE hInstance, int nCmdShow, Game* game)
+bool WindowManager::Initialize(HINSTANCE hInstance, int nCmdShow, Renderer* renderer)
 {
     m_hInstance = hInstance;
-    m_game = game;
+    m_renderer = renderer;
 
     if (!RegisterWindowClass())
         return false;
 
-    if (!CreateGameWindow(nCmdShow))
+    if (!CreateRendererWindow(nCmdShow))
         return false;
 
     return true;
@@ -60,10 +60,10 @@ bool WindowManager::RegisterWindowClass()
     return RegisterClassExW(&wcex) != 0;
 }
 
-bool WindowManager::CreateGameWindow(int nCmdShow)
+bool WindowManager::CreateRendererWindow(int nCmdShow)
 {
     int w, h;
-    m_game->GetDefaultSize(w, h);
+    m_renderer->GetDefaultSize(w, h);
 
     RECT rc = {0, 0, static_cast<LONG>(w), static_cast<LONG>(h)};
     AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
@@ -80,7 +80,7 @@ bool WindowManager::CreateGameWindow(int nCmdShow)
         nullptr,
         nullptr,
         m_hInstance,
-        m_game
+        m_renderer
     );
 
     if (!m_hwnd)
@@ -88,7 +88,7 @@ bool WindowManager::CreateGameWindow(int nCmdShow)
 
     ShowWindow(m_hwnd, nCmdShow);
     GetClientRect(m_hwnd, &rc);
-    m_game->Initialize(m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
+    m_renderer->Initialize(m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
 
     return true;
 }
@@ -102,8 +102,8 @@ void WindowManager::ToggleFullscreen()
 
         int width = 800;
         int height = 600;
-        if (m_game)
-            m_game->GetDefaultSize(width, height);
+        if (m_renderer)
+            m_renderer->GetDefaultSize(width, height);
 
         ShowWindow(m_hwnd, SW_SHOWNORMAL);
         SetWindowPos(m_hwnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
@@ -121,7 +121,7 @@ void WindowManager::ToggleFullscreen()
 
 LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    auto game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    auto renderer = reinterpret_cast<Renderer*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (message)
     {
@@ -134,9 +134,9 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
         break;
 
     case WM_PAINT:
-        if (s_in_sizemove && game)
+        if (s_in_sizemove && renderer)
         {
-            game->Tick();
+            renderer->Tick();
         }
         else
         {
@@ -147,16 +147,16 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
         break;
 
     case WM_DISPLAYCHANGE:
-        if (game)
+        if (renderer)
         {
-            game->OnDisplayChange();
+            renderer->OnDisplayChange();
         }
         break;
 
     case WM_MOVE:
-        if (game)
+        if (renderer)
         {
-            game->OnWindowMoved();
+            renderer->OnWindowMoved();
         }
         break;
 
@@ -166,21 +166,21 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
             if (!s_minimized)
             {
                 s_minimized = true;
-                if (!s_in_suspend && game)
-                    game->OnSuspending();
+                if (!s_in_suspend && renderer)
+                    renderer->OnSuspending();
                 s_in_suspend = true;
             }
         }
         else if (s_minimized)
         {
             s_minimized = false;
-            if (s_in_suspend && game)
-                game->OnResuming();
+            if (s_in_suspend && renderer)
+                renderer->OnResuming();
             s_in_suspend = false;
         }
-        else if (!s_in_sizemove && game)
+        else if (!s_in_sizemove && renderer)
         {
-            game->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
+            renderer->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
         }
         break;
 
@@ -190,11 +190,11 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
 
     case WM_EXITSIZEMOVE:
         s_in_sizemove = false;
-        if (game)
+        if (renderer)
         {
             RECT rc;
             GetClientRect(hWnd, &rc);
-            game->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
+            renderer->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
         }
         break;
 
@@ -208,15 +208,15 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
         break;
 
     case WM_ACTIVATEAPP:
-        if (game)
+        if (renderer)
         {
             if (wParam)
             {
-                game->OnActivated();
+                renderer->OnActivated();
             }
             else
             {
-                game->OnDeactivated();
+                renderer->OnDeactivated();
             }
         }
         break;
@@ -225,16 +225,16 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
         switch (wParam)
         {
         case PBT_APMQUERYSUSPEND:
-            if (!s_in_suspend && game)
-                game->OnSuspending();
+            if (!s_in_suspend && renderer)
+                renderer->OnSuspending();
             s_in_suspend = true;
             return TRUE;
 
         case PBT_APMRESUMESUSPEND:
             if (!s_minimized)
             {
-                if (s_in_suspend && game)
-                    game->OnResuming();
+                if (s_in_suspend && renderer)
+                    renderer->OnResuming();
                 s_in_suspend = false;
             }
             return TRUE;
@@ -262,8 +262,8 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
 
                 int width = 800;
                 int height = 600;
-                if (game)
-                    game->GetDefaultSize(width, height);
+                if (renderer)
+                    renderer->GetDefaultSize(width, height);
 
                 ShowWindow(hWnd, SW_SHOWNORMAL);
                 SetWindowPos(hWnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);

@@ -9,19 +9,19 @@
 
 #include <memory>
 
-// A basic game implementation that creates a D3D12 device and
-// provides a game loop.
-class Game final : public DX::IDeviceNotify
+// A basic renderer implementation that creates a D3D12 device and
+// provides rendering functionality.
+class Renderer final : public DX::IDeviceNotify
 {
 public:
-    Game() noexcept(false);
-    ~Game();
+    Renderer() noexcept(false);
+    ~Renderer();
 
-    Game(Game&&) = default;
-    Game& operator=(Game&&) = default;
+    Renderer(Renderer&&) = default;
+    Renderer& operator=(Renderer&&) = default;
 
-    Game(Game const&) = delete;
-    Game& operator=(Game const&) = delete;
+    Renderer(Renderer const&) = delete;
+    Renderer& operator=(Renderer const&) = delete;
 
     // Initialization and management
     void Initialize(HWND window, int width, int height);
@@ -53,6 +53,7 @@ private:
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
+    void CreateTriangleResources();
 
     // Device resources.
     std::unique_ptr<DX::DeviceResources> m_deviceResources;
@@ -62,4 +63,10 @@ private:
 
     // If using the DirectX Tool Kit for DX12, uncomment this line:
     // std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
+
+    // Triangle rendering resources
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
+    Microsoft::WRL::ComPtr<ID3D12Resource> m_vertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 };

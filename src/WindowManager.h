@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-class Game;
+class Renderer;
 
 class WindowManager
 {
@@ -10,7 +10,7 @@ public:
     WindowManager();
     ~WindowManager();
 
-    bool Initialize(HINSTANCE hInstance, int nCmdShow, Game* game);
+    bool Initialize(HINSTANCE hInstance, int nCmdShow, Renderer* renderer);
     void Shutdown();
 
     HWND GetWindowHandle() const
@@ -27,7 +27,7 @@ public:
 private:
     HWND m_hwnd;
     HINSTANCE m_hInstance;
-    Game* m_game;
+    Renderer* m_renderer;
     bool m_fullscreen;
 
     static bool s_in_sizemove;
@@ -35,6 +35,6 @@ private:
     static bool s_minimized;
 
     void ToggleFullscreen();
-    bool CreateGameWindow(int nCmdShow);
+    bool CreateRendererWindow(int nCmdShow);
     bool RegisterWindowClass();
 };
