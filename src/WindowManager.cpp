@@ -8,11 +8,11 @@ bool WindowManager::s_in_sizemove = false;
 bool WindowManager::s_in_suspend = false;
 bool WindowManager::s_minimized = false;
 
-WindowManager::WindowManager()
-    : m_hwnd(nullptr)
-    , m_hInstance(nullptr)
-    , m_game(nullptr)
-    , m_fullscreen(false)
+WindowManager::WindowManager() :
+    m_hwnd(nullptr),
+    m_hInstance(nullptr),
+    m_game(nullptr),
+    m_fullscreen(false)
 {
 }
 
@@ -25,13 +25,13 @@ bool WindowManager::Initialize(HINSTANCE hInstance, int nCmdShow, Game* game)
 {
     m_hInstance = hInstance;
     m_game = game;
-    
+
     if (!RegisterWindowClass())
         return false;
-        
+
     if (!CreateGameWindow(nCmdShow))
         return false;
-        
+
     return true;
 }
 
@@ -56,7 +56,7 @@ bool WindowManager::RegisterWindowClass()
     wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
     wcex.lpszClassName = L"direct_3d_playgroundWindowClass";
     wcex.hIconSm = LoadIconW(wcex.hInstance, L"IDI_ICON");
-    
+
     return RegisterClassExW(&wcex) != 0;
 }
 
@@ -65,12 +65,23 @@ bool WindowManager::CreateGameWindow(int nCmdShow)
     int w, h;
     m_game->GetDefaultSize(w, h);
 
-    RECT rc = { 0, 0, static_cast<LONG>(w), static_cast<LONG>(h) };
+    RECT rc = {0, 0, static_cast<LONG>(w), static_cast<LONG>(h)};
     AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
-    m_hwnd = CreateWindowExW(0, L"direct_3d_playgroundWindowClass", g_szAppName, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-        nullptr, nullptr, m_hInstance, m_game);
+    m_hwnd = CreateWindowExW(
+        0,
+        L"direct_3d_playgroundWindowClass",
+        g_szAppName,
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        rc.right - rc.left,
+        rc.bottom - rc.top,
+        nullptr,
+        nullptr,
+        m_hInstance,
+        m_game
+    );
 
     if (!m_hwnd)
         return false;
@@ -78,7 +89,7 @@ bool WindowManager::CreateGameWindow(int nCmdShow)
     ShowWindow(m_hwnd, nCmdShow);
     GetClientRect(m_hwnd, &rc);
     m_game->Initialize(m_hwnd, rc.right - rc.left, rc.bottom - rc.top);
-    
+
     return true;
 }
 
@@ -241,7 +252,8 @@ LRESULT CALLBACK WindowManager::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
         if (wParam == VK_RETURN && (lParam & 0x60000000) == 0x20000000)
         {
             // Find WindowManager instance by searching for the window handle
-            // This is a simplified approach - in a real application you might store the instance differently
+            // This is a simplified approach - in a real application you might store the instance
+            // differently
             static bool s_fullscreen = false;
             if (s_fullscreen)
             {

@@ -1,0 +1,40 @@
+---
+BasedOnStyle: Microsoft
+Language: Cpp
+
+UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+AccessModifierOffset: -4
+
+ColumnLimit: 0
+
+AlignOperands: Align
+AlignAfterOpenBracket: BlockIndent
+
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+
+AlwaysBreakAfterReturnType: None
+
+BinPackArguments: false
+BinPackParameters: false
+
+BreakBeforeBraces: Allman
+BreakBeforeBinaryOperators: None
+BreakConstructorInitializers: AfterColon
+
+ExperimentalAutoDetectBinPacking: false
+IncludeBlocks: Preserve
+PackConstructorInitializers: Never
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyReturnTypeOnItsOwnLine: 200
+PointerAlignment: Left
+ReferenceAlignment: Left
+SortIncludes: false

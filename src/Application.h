@@ -17,7 +17,7 @@ private:
     bool Initialize(HINSTANCE hInstance, int nCmdShow);
     void Shutdown();
     int MessageLoop();
-    
+
     std::unique_ptr<Game> m_game;
     std::unique_ptr<WindowManager> m_windowManager;
 };

@@ -19,24 +19,29 @@ using Microsoft::WRL::ComPtr;
 
 namespace
 {
-    inline DXGI_FORMAT NoSRGB(DXGI_FORMAT fmt) noexcept
+inline DXGI_FORMAT NoSRGB(DXGI_FORMAT fmt) noexcept
+{
+    switch (fmt)
     {
-        switch (fmt)
-        {
-        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:   return DXGI_FORMAT_R8G8B8A8_UNORM;
-        case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:   return DXGI_FORMAT_B8G8R8A8_UNORM;
-        case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:   return DXGI_FORMAT_B8G8R8X8_UNORM;
-        default:                                return fmt;
-        }
-    }
-
-    inline long ComputeIntersectionArea(
-        long ax1, long ay1, long ax2, long ay2,
-        long bx1, long by1, long bx2, long by2) noexcept
-    {
-        return std::max(0l, std::min(ax2, bx2) - std::max(ax1, bx1)) * std::max(0l, std::min(ay2, by2) - std::max(ay1, by1));
+    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+        return DXGI_FORMAT_R8G8B8A8_UNORM;
+    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+        return DXGI_FORMAT_B8G8R8A8_UNORM;
+    case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+        return DXGI_FORMAT_B8G8R8X8_UNORM;
+    default:
+        return fmt;
     }
 }
+
+inline long ComputeIntersectionArea(
+    long ax1, long ay1, long ax2, long ay2, long bx1, long by1, long bx2, long by2
+) noexcept
+{
+    return std::max(0l, std::min(ax2, bx2) - std::max(ax1, bx1)) *
+           std::max(0l, std::min(ay2, by2) - std::max(ay1, by1));
+}
+} // namespace
 
 // Constructor for DeviceResources.
 DeviceResources::DeviceResources(
@@ -44,23 +49,24 @@ DeviceResources::DeviceResources(
     DXGI_FORMAT depthBufferFormat,
     UINT backBufferCount,
     D3D_FEATURE_LEVEL minFeatureLevel,
-    unsigned int flags) noexcept(false) :
-        m_backBufferIndex(0),
-        m_fenceValues{},
-        m_rtvDescriptorSize(0),
-        m_screenViewport{},
-        m_scissorRect{},
-        m_backBufferFormat(backBufferFormat),
-        m_depthBufferFormat(depthBufferFormat),
-        m_backBufferCount(backBufferCount),
-        m_d3dMinFeatureLevel(minFeatureLevel),
-        m_window(nullptr),
-        m_d3dFeatureLevel(D3D_FEATURE_LEVEL_11_0),
-        m_dxgiFactoryFlags(0),
-        m_outputSize{0, 0, 1, 1},
-        m_colorSpace(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709),
-        m_options(flags),
-        m_deviceNotify(nullptr)
+    unsigned int flags
+) noexcept(false) :
+    m_backBufferIndex(0),
+    m_fenceValues{},
+    m_rtvDescriptorSize(0),
+    m_screenViewport{},
+    m_scissorRect{},
+    m_backBufferFormat(backBufferFormat),
+    m_depthBufferFormat(depthBufferFormat),
+    m_backBufferCount(backBufferCount),
+    m_d3dMinFeatureLevel(minFeatureLevel),
+    m_window(nullptr),
+    m_d3dFeatureLevel(D3D_FEATURE_LEVEL_11_0),
+    m_dxgiFactoryFlags(0),
+    m_outputSize{0, 0, 1, 1},
+    m_colorSpace(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709),
+    m_options(flags),
+    m_deviceNotify(nullptr)
 {
     if (backBufferCount < 2 || backBufferCount > MAX_BACK_BUFFER_COUNT)
     {
@@ -106,9 +112,10 @@ void DeviceResources::CreateDeviceResources()
             dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, true);
             dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
 
-            DXGI_INFO_QUEUE_MESSAGE_ID hide[] =
-            {
-                80 /* IDXGISwapChain::GetContainingOutput: The swapchain's adapter does not control the output on which the swapchain's window resides. */,
+            DXGI_INFO_QUEUE_MESSAGE_ID hide[] = {
+                80 /* IDXGISwapChain::GetContainingOutput: The swapchain's adapter does not control
+                      the output on which the swapchain's window resides. */
+                ,
             };
             DXGI_INFO_QUEUE_FILTER filter = {};
             filter.DenyList.NumIDs = static_cast<UINT>(std::size(hide));
@@ -124,7 +131,11 @@ void DeviceResources::CreateDeviceResources()
     if (m_options & c_AllowTearing)
     {
         BOOL allowTearing = FALSE;
-        HRESULT hr = m_dxgiFactory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+        HRESULT hr = m_dxgiFactory->CheckFeatureSupport(
+            DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+            &allowTearing,
+            sizeof(allowTearing)
+        );
         if (FAILED(hr) || !allowTearing)
         {
             m_options &= ~c_AllowTearing;
@@ -142,7 +153,7 @@ void DeviceResources::CreateDeviceResources()
         adapter.Get(),
         m_d3dMinFeatureLevel,
         IID_PPV_ARGS(m_d3dDevice.ReleaseAndGetAddressOf())
-        );
+    );
     ThrowIfFailed(hr);
 
     m_d3dDevice->SetName(L"DeviceResources");
@@ -156,8 +167,7 @@ void DeviceResources::CreateDeviceResources()
         d3dInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
         d3dInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 #endif
-        D3D12_MESSAGE_ID hide[] =
-        {
+        D3D12_MESSAGE_ID hide[] = {
             D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,
             D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,
             // Workarounds for debug layer issues on hybrid-graphics systems
@@ -172,8 +182,7 @@ void DeviceResources::CreateDeviceResources()
 #endif
 
     // Determine maximum supported feature level for this device
-    static const D3D_FEATURE_LEVEL s_featureLevels[] =
-    {
+    static const D3D_FEATURE_LEVEL s_featureLevels[] = {
 #if defined(NTDDI_WIN10_FE) || defined(USING_D3D12_AGILITY_SDK)
         D3D_FEATURE_LEVEL_12_2,
 #endif
@@ -183,9 +192,10 @@ void DeviceResources::CreateDeviceResources()
         D3D_FEATURE_LEVEL_11_0,
     };
 
-    D3D12_FEATURE_DATA_FEATURE_LEVELS featLevels =
-    {
-        static_cast<UINT>(std::size(s_featureLevels)), s_featureLevels, D3D_FEATURE_LEVEL_11_0
+    D3D12_FEATURE_DATA_FEATURE_LEVELS featLevels = {
+        static_cast<UINT>(std::size(s_featureLevels)),
+        s_featureLevels,
+        D3D_FEATURE_LEVEL_11_0
     };
 
     hr = m_d3dDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featLevels, sizeof(featLevels));
@@ -212,7 +222,10 @@ void DeviceResources::CreateDeviceResources()
     rtvDescriptorHeapDesc.NumDescriptors = m_backBufferCount;
     rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
-    ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(m_rtvDescriptorHeap.ReleaseAndGetAddressOf())));
+    ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(
+        &rtvDescriptorHeapDesc,
+        IID_PPV_ARGS(m_rtvDescriptorHeap.ReleaseAndGetAddressOf())
+    ));
 
     m_rtvDescriptorHeap->SetName(L"DeviceResources");
 
@@ -224,7 +237,10 @@ void DeviceResources::CreateDeviceResources()
         dsvDescriptorHeapDesc.NumDescriptors = 1;
         dsvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 
-        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&dsvDescriptorHeapDesc, IID_PPV_ARGS(m_dsvDescriptorHeap.ReleaseAndGetAddressOf())));
+        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(
+            &dsvDescriptorHeapDesc,
+            IID_PPV_ARGS(m_dsvDescriptorHeap.ReleaseAndGetAddressOf())
+        ));
 
         m_dsvDescriptorHeap->SetName(L"DeviceResources");
     }
@@ -232,7 +248,10 @@ void DeviceResources::CreateDeviceResources()
     // Create a command allocator for each back buffer that will be rendered to.
     for (UINT n = 0; n < m_backBufferCount; n++)
     {
-        ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(m_commandAllocators[n].ReleaseAndGetAddressOf())));
+        ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            IID_PPV_ARGS(m_commandAllocators[n].ReleaseAndGetAddressOf())
+        ));
 
         wchar_t name[25] = {};
         swprintf_s(name, L"Render target %u", n);
@@ -240,13 +259,23 @@ void DeviceResources::CreateDeviceResources()
     }
 
     // Create a command list for recording graphics commands.
-    ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[0].Get(), nullptr, IID_PPV_ARGS(m_commandList.ReleaseAndGetAddressOf())));
+    ThrowIfFailed(m_d3dDevice->CreateCommandList(
+        0,
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        m_commandAllocators[0].Get(),
+        nullptr,
+        IID_PPV_ARGS(m_commandList.ReleaseAndGetAddressOf())
+    ));
     ThrowIfFailed(m_commandList->Close());
 
     m_commandList->SetName(L"DeviceResources");
 
     // Create a fence for tracking GPU execution progress.
-    ThrowIfFailed(m_d3dDevice->CreateFence(m_fenceValues[m_backBufferIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.ReleaseAndGetAddressOf())));
+    ThrowIfFailed(m_d3dDevice->CreateFence(
+        m_fenceValues[m_backBufferIndex],
+        D3D12_FENCE_FLAG_NONE,
+        IID_PPV_ARGS(m_fence.ReleaseAndGetAddressOf())
+    ));
     m_fenceValues[m_backBufferIndex]++;
 
     m_fence->SetName(L"DeviceResources");
@@ -254,7 +283,10 @@ void DeviceResources::CreateDeviceResources()
     m_fenceEvent.Attach(CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE));
     if (!m_fenceEvent.IsValid())
     {
-        throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "CreateEventEx");
+        throw std::system_error(
+            std::error_code(static_cast<int>(GetLastError()), std::system_category()),
+            "CreateEventEx"
+        );
     }
 }
 
@@ -291,21 +323,27 @@ void DeviceResources::CreateWindowSizeDependentResources()
             backBufferHeight,
             backBufferFormat,
             (m_options & c_AllowTearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u
-            );
+        );
 
         if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
         {
 #ifdef _DEBUG
             char buff[64] = {};
-            sprintf_s(buff, "Device Lost on ResizeBuffers: Reason code 0x%08X\n",
-                static_cast<unsigned int>((hr == DXGI_ERROR_DEVICE_REMOVED) ? m_d3dDevice->GetDeviceRemovedReason() : hr));
+            sprintf_s(
+                buff,
+                "Device Lost on ResizeBuffers: Reason code 0x%08X\n",
+                static_cast<unsigned int>(
+                    (hr == DXGI_ERROR_DEVICE_REMOVED) ? m_d3dDevice->GetDeviceRemovedReason() : hr
+                )
+            );
             OutputDebugStringA(buff);
 #endif
-            // If the device was removed for any reason, a new device and swap chain will need to be created.
+            // If the device was removed for any reason, a new device and swap chain will need to be
+            // created.
             HandleDeviceLost();
 
-            // Everything is set up now. Do not continue execution of this method. HandleDeviceLost will reenter this method
-            // and correctly set up the new device.
+            // Everything is set up now. Do not continue execution of this method. HandleDeviceLost
+            // will reenter this method and correctly set up the new device.
             return;
         }
         else
@@ -341,11 +379,12 @@ void DeviceResources::CreateWindowSizeDependentResources()
             &fsSwapChainDesc,
             nullptr,
             swapChain.GetAddressOf()
-            ));
+        ));
 
         ThrowIfFailed(swapChain.As(&m_swapChain));
 
-        // This class does not support exclusive full-screen mode and prevents DXGI from responding to the ALT+ENTER shortcut
+        // This class does not support exclusive full-screen mode and prevents DXGI from responding
+        // to the ALT+ENTER shortcut
         ThrowIfFailed(m_dxgiFactory->MakeWindowAssociation(m_window, DXGI_MWA_NO_ALT_ENTER));
     }
 
@@ -386,10 +425,14 @@ void DeviceResources::CreateWindowSizeDependentResources()
             backBufferHeight,
             1, // Use a single array entry.
             1  // Use a single mipmap level.
-            );
+        );
         depthStencilDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-        const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(m_depthBufferFormat, (m_options & c_ReverseDepth) ? 0.0f : 1.0f, 0u);
+        const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(
+            m_depthBufferFormat,
+            (m_options & c_ReverseDepth) ? 0.0f : 1.0f,
+            0u
+        );
 
         ThrowIfFailed(m_d3dDevice->CreateCommittedResource(
             &depthHeapProperties,
@@ -398,7 +441,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
             D3D12_RESOURCE_STATE_DEPTH_WRITE,
             &depthOptimizedClearValue,
             IID_PPV_ARGS(m_depthStencil.ReleaseAndGetAddressOf())
-            ));
+        ));
 
         m_depthStencil->SetName(L"Depth stencil");
 
@@ -484,7 +527,10 @@ void DeviceResources::HandleDeviceLost()
         ComPtr<IDXGIDebug1> dxgiDebug;
         if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
         {
-            dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+            dxgiDebug->ReportLiveObjects(
+                DXGI_DEBUG_ALL,
+                DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL)
+            );
         }
     }
 #endif
@@ -508,9 +554,8 @@ void DeviceResources::Prepare(D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_
     if (beforeState != afterState)
     {
         // Transition the render target into the correct state to allow for drawing into it.
-        const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_renderTargets[m_backBufferIndex].Get(),
-            beforeState, afterState);
+        const D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_backBufferIndex].Get(), beforeState, afterState);
         m_commandList->ResourceBarrier(1, &barrier);
     }
 }
@@ -523,7 +568,9 @@ void DeviceResources::Present(D3D12_RESOURCE_STATES beforeState)
         // Transition the render target to the state that allows it to be presented to the display.
         const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
             m_renderTargets[m_backBufferIndex].Get(),
-            beforeState, D3D12_RESOURCE_STATE_PRESENT);
+            beforeState,
+            D3D12_RESOURCE_STATE_PRESENT
+        );
         m_commandList->ResourceBarrier(1, &barrier);
     }
 
@@ -551,8 +598,11 @@ void DeviceResources::Present(D3D12_RESOURCE_STATES beforeState)
     {
 #ifdef _DEBUG
         char buff[64] = {};
-        sprintf_s(buff, "Device Lost on Present: Reason code 0x%08X\n",
-            static_cast<unsigned int>((hr == DXGI_ERROR_DEVICE_REMOVED) ? m_d3dDevice->GetDeviceRemovedReason() : hr));
+        sprintf_s(
+            buff,
+            "Device Lost on Present: Reason code 0x%08X\n",
+            static_cast<unsigned int>((hr == DXGI_ERROR_DEVICE_REMOVED) ? m_d3dDevice->GetDeviceRemovedReason() : hr)
+        );
         OutputDebugStringA(buff);
 #endif
         HandleDeviceLost();
@@ -619,12 +669,15 @@ void DeviceResources::GetAdapter(IDXGIAdapter1** ppAdapter)
     *ppAdapter = nullptr;
 
     ComPtr<IDXGIAdapter1> adapter;
-    for (UINT adapterIndex = 0;
+    for (
+        UINT adapterIndex = 0;
         SUCCEEDED(m_dxgiFactory->EnumAdapterByGpuPreference(
             adapterIndex,
             DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-            IID_PPV_ARGS(adapter.ReleaseAndGetAddressOf())));
-        adapterIndex++)
+            IID_PPV_ARGS(adapter.ReleaseAndGetAddressOf())
+        ));
+        adapterIndex++
+    )
     {
         DXGI_ADAPTER_DESC1 desc;
         ThrowIfFailed(adapter->GetDesc1(&desc));
@@ -638,11 +691,18 @@ void DeviceResources::GetAdapter(IDXGIAdapter1** ppAdapter)
         // Check to see if the adapter supports Direct3D 12, but don't create the actual device yet.
         if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), m_d3dMinFeatureLevel, __uuidof(ID3D12Device), nullptr)))
         {
-        #ifdef _DEBUG
+#ifdef _DEBUG
             wchar_t buff[256] = {};
-            swprintf_s(buff, L"Direct3D Adapter (%u): VID:%04X, PID:%04X - %ls\n", adapterIndex, desc.VendorId, desc.DeviceId, desc.Description);
+            swprintf_s(
+                buff,
+                L"Direct3D Adapter (%u): VID:%04X, PID:%04X - %ls\n",
+                adapterIndex,
+                desc.VendorId,
+                desc.DeviceId,
+                desc.Description
+            );
             OutputDebugStringW(buff);
-        #endif
+#endif
             break;
         }
     }
@@ -676,7 +736,8 @@ void DeviceResources::UpdateColorSpace()
 
     if (!m_dxgiFactory->IsCurrent())
     {
-        // Output information is cached on the DXGI Factory. If it is stale we need to create a new factory.
+        // Output information is cached on the DXGI Factory. If it is stale we need to create a new
+        // factory.
         ThrowIfFailed(CreateDXGIFactory2(m_dxgiFactoryFlags, IID_PPV_ARGS(m_dxgiFactory.ReleaseAndGetAddressOf())));
     }
 
@@ -693,7 +754,10 @@ void DeviceResources::UpdateColorSpace()
         // Get the retangle bounds of the app window.
         RECT windowBounds;
         if (!GetWindowRect(m_window, &windowBounds))
-            throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "GetWindowRect");
+            throw std::system_error(
+                std::error_code(static_cast<int>(GetLastError()), std::system_category()),
+                "GetWindowRect"
+            );
 
         const long ax1 = windowBounds.left;
         const long ay1 = windowBounds.top;
@@ -705,13 +769,15 @@ void DeviceResources::UpdateColorSpace()
 
         ComPtr<IDXGIAdapter> adapter;
         for (UINT adapterIndex = 0;
-            SUCCEEDED(m_dxgiFactory->EnumAdapters(adapterIndex, adapter.ReleaseAndGetAddressOf()));
-            ++adapterIndex)
+             SUCCEEDED(m_dxgiFactory->EnumAdapters(adapterIndex, adapter.ReleaseAndGetAddressOf()));
+             ++adapterIndex)
         {
             ComPtr<IDXGIOutput> output;
-            for (UINT outputIndex = 0;
+            for (
+                UINT outputIndex = 0;
                 SUCCEEDED(adapter->EnumOutputs(outputIndex, output.ReleaseAndGetAddressOf()));
-                ++outputIndex)
+                ++outputIndex
+            )
             {
                 // Get the rectangle bounds of current output.
                 DXGI_OUTPUT_DESC desc;
@@ -719,7 +785,16 @@ void DeviceResources::UpdateColorSpace()
                 const auto& r = desc.DesktopCoordinates;
 
                 // Compute the intersection
-                const long intersectArea = ComputeIntersectionArea(ax1, ay1, ax2, ay2, r.left, r.top, r.right, r.bottom);
+                const long intersectArea = ComputeIntersectionArea(
+                    ax1,
+                    ay1,
+                    ax2,
+                    ay2,
+                    r.left,
+                    r.top,
+                    r.right,
+                    r.bottom
+                );
                 if (intersectArea > bestIntersectArea)
                 {
                     bestOutput.Swap(output);
@@ -767,9 +842,11 @@ void DeviceResources::UpdateColorSpace()
     m_colorSpace = colorSpace;
 
     UINT colorSpaceSupport = 0;
-    if (m_swapChain
-        && SUCCEEDED(m_swapChain->CheckColorSpaceSupport(colorSpace, &colorSpaceSupport))
-        && (colorSpaceSupport & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT))
+    if (
+        m_swapChain &&
+        SUCCEEDED(m_swapChain->CheckColorSpaceSupport(colorSpace, &colorSpaceSupport)) &&
+        (colorSpaceSupport & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT)
+    )
     {
         ThrowIfFailed(m_swapChain->SetColorSpace1(colorSpace));
     }

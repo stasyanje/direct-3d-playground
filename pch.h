@@ -82,46 +82,49 @@
 #include <XCurl.h>
 
 // If using the DirectX Shader Compiler API, uncomment this line:
-//#include <directx-dxc/dxcapi.h>
+// #include <directx-dxc/dxcapi.h>
 
 // If using DirectStorage, uncomment this line:
-//#include <dstorage.h>
+// #include <dstorage.h>
 
 // If using the DirectX Tool Kit for DX12, uncomment this line:
-//#include <directxtk12/GraphicsMemory.h>
+// #include <directxtk12/GraphicsMemory.h>
 
 // If using Xbox GameChat, uncomment this line:
-//#include <GameChat2.h>
+// #include <GameChat2.h>
 
 // If using Azure PlayFab Services, uncommment these:
-//#include <playfab/core/PFErrors.h>
-//#include <playfab/services/PFServices.h>
+// #include <playfab/core/PFErrors.h>
+// #include <playfab/services/PFServices.h>
 
 namespace DX
 {
-    // Helper class for COM exceptions
-    class com_exception : public std::exception
+// Helper class for COM exceptions
+class com_exception : public std::exception
+{
+public:
+    com_exception(HRESULT hr) noexcept :
+        result(hr)
     {
-    public:
-        com_exception(HRESULT hr) noexcept : result(hr) {}
+    }
 
-        const char* what() const noexcept override
-        {
-            static char s_str[64] = {};
-            sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
-            return s_str;
-        }
-
-    private:
-        HRESULT result;
-    };
-
-    // Helper utility converts D3D API failures into exceptions.
-    inline void ThrowIfFailed(HRESULT hr)
+    const char* what() const noexcept override
     {
-        if (FAILED(hr))
-        {
-            throw com_exception(hr);
-        }
+        static char s_str[64] = {};
+        sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+        return s_str;
+    }
+
+private:
+    HRESULT result;
+};
+
+// Helper utility converts D3D API failures into exceptions.
+inline void ThrowIfFailed(HRESULT hr)
+{
+    if (FAILED(hr))
+    {
+        throw com_exception(hr);
     }
 }
+} // namespace DX

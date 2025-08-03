@@ -189,10 +189,13 @@ copy "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\bin\D
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include=".editorconfig" />
     <None Include=".gitignore" />
     <None Include="CLAUDE.md" />
     <None Include="CppProperties.json" />
     <None Include="LICENSE" />
+    <None Include="Makefile" />
     <None Include="PackageLayout.flt" />
     <None Include="PackageLayout.ps1" />
     <None Include="README.md" />
