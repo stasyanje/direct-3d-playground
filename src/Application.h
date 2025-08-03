@@ -1,9 +1,9 @@
 #pragma once
 
 #include "pch.h"
-#include "WindowManager.h"
 
 class Game;
+class WindowManager;
 
 class Application
 {

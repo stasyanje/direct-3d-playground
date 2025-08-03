@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 #include "Game.h"
+#include "WindowManager.h"
 
 using namespace DirectX;
 
