@@ -1,0 +1,23 @@
+#pragma once
+
+#include "pch.h"
+#include "WindowManager.h"
+
+class Game;
+
+class Application
+{
+public:
+    Application();
+    ~Application();
+
+    int Run(HINSTANCE hInstance, int nCmdShow);
+
+private:
+    bool Initialize(HINSTANCE hInstance, int nCmdShow);
+    void Shutdown();
+    int MessageLoop();
+    
+    std::unique_ptr<Game> m_game;
+    std::unique_ptr<WindowManager> m_windowManager;
+};

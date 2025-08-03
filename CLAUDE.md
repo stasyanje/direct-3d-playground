@@ -17,6 +17,8 @@ Direct 3D Playground - A toy graphics engine built with Direct3D for learning an
 
 Rules
 	- Every new file should go to a non-root folder
+	- Every new source file must be in .\src\ unless mandatory outside
+	- Similar feature source files must be put into a new folder when it starts to make sense
 
 ## Graphics Pipeline Notes
 - Using Direct3D for hardware-accelerated rendering
