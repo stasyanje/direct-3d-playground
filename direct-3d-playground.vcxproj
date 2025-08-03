@@ -215,4 +215,7 @@ copy "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\bin\D
     </PropertyGroup>
     <Error Condition="!Exists('$(VCInstallDir)vcpkg')" Text="$(ErrorText)" />
   </Target>
+  <Target Name="IncrementalClean">
+	<Message Text="IncrementalClean Overridden. This may have undesired long term problems." />
+  </Target>
 </Project>
