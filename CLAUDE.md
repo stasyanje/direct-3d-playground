@@ -14,7 +14,9 @@ Direct 3D Playground - A toy graphics engine built with Direct3D for learning an
 <!-- Add build, run, and test commands here -->
 
 ## Project Structure
-<!-- Document key directories and files here -->
+
+Rules
+	- Every new file should go to a non-root folder
 
 ## Graphics Pipeline Notes
 - Using Direct3D for hardware-accelerated rendering
@@ -22,7 +24,8 @@ Direct 3D Playground - A toy graphics engine built with Direct3D for learning an
 - Modular shader system for flexibility
 
 ## TODOs
-- [ ] Implement frame timing/pacing system
+- [ ] Refactor Main.cpp
+- [ ] - [ ] Implement frame timing/pacing system
 - [ ] Create basic 2D shape primitives (rectangles, circles, lines)
 - [ ] Build shader loading and compilation pipeline
 - [ ] Add input handling for interactive demos
