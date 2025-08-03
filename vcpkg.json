@@ -1,0 +1,24 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "dependencies": [
+        {
+            "name": "directx-dxc",
+            "host": true
+        },
+        "directx-dxc",
+        "directx-headers",
+        "directx12-agility",
+        "directxmath",
+        "dstorage",
+        "gameinput",
+        "ms-gdk",
+        "winpixevent"
+    ],
+    "vcpkg-configuration": {
+        "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
+        "default-registry": {
+            "kind": "builtin",
+            "baseline": "4b64072353e71280f6c38bfafff2fbc4580629f1"
+        }
+    }
+}
