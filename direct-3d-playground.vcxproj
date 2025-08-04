@@ -136,6 +136,7 @@ copy "$(VcpkgManifestRoot)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\bin\D
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Log.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="src\DeviceResources.h" />

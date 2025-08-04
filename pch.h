@@ -99,6 +99,8 @@
 // #include <playfab/core/PFErrors.h>
 // #include <playfab/services/PFServices.h>
 
+#include "src/Log.h"
+
 namespace DX
 {
 // Helper class for COM exceptions
